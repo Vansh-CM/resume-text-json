@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Form</title>
+    <style>
+      body {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            margin: 0;
+            background-color:#fffff9;
+            font-weight: 300;
+        }
+        .section {
+            flex: 1;
+            padding: 20px;
+            margin: 2%;
+            overflow-y: auto;
+            /* border-right: 1px solid #ccc; */
+        }
+        .section:last-child {
+            border-right: none;
+           
+        }
+        #additionalInput {
+            height: 80%;
+        }
+        .section:nth-child(1) {
+            background-color: #f1ffd0;
+        }
+        .section:nth-child(2) {
+            background-color:#fffff9;
+        }
+        .section:nth-child(3) {
+            background-color: #f1ffd0;
+        }
+        button {
+            background-color: #565e12;
+            /* #373b0b; */
+            border-radius: 15px;
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+            color:  #f1ffd0;
+            font-style: italic;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color:#f1ffd0;
+            color: black;
+        }
+   
+        textarea {
+            width: 100%;
+            height: 80%;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h2 style="color: #49500f ;">Upload a File</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <button type="button" onclick="reloadPage()">restart</button> <br>
+            <input type="file" name="file" id="fileInput" accept=".pdf,.doc,.docx">
+            <button type="button" onclick="uploadFile()">Upload</button>
+        </form>
+        <div id="firstApiResponse"></div>
+    </div>
+
+    <div class="section">
+        <h2 style="color: #565e12 ;">Additional Input</h2>
+        <textarea id="additionalInput" placeholder="Enter additional data"></textarea>
+        <button type="button" onclick="sendData()">Send Data</button>
+        <div id="secondApiuse"></div>
+    </div>
+
+    <div class="section">
+        <h2 style="color: #565e12 ;">API Response Data</h2>
+        <div id="secondApiResponse"></div>
+      
+    </div>
+
+    <script>
+        let firstApiResponseData = ['Given the provided resume template, extract the information and format it strictly according to the JSON schema below. Only provide the JSON response. Do not include any additional text or explanations.\n \n'];
+        let promptStr = ` 
+
+{
+  "Companies worked for": {
+    "Company 1": {
+      "Company": "VOLOBOT",
+      "Designation": "Frontend Developer",
+      "Duration": "Nov 2023 – Present"
+    },
+    "Company 2": {
+      "Company": "BITCS",
+      "Designation": "MERN stack developer",
+      "Duration": "Jan 2021 – Feb 2022"
+    },
+    "Company 3": {
+      "Company": "SCORELAB",
+      "Designation": "Open Source Contributor",
+      "Duration": "Jun 2022 – Dec 2022"
+    }
+  },
+  "Email": "kushalshukla110@gmail.com",
+  "Graduation details": {
+    "CPI": "CGPA:8.24",
+    "College": "AISSMS IOIT",
+    "Degree": "BE in Information Technology",
+    "Duration": "July 2020 - July 2024"
+  },
+  "LinkedIn": "https://www.linkedin.com/in/itsmekushalshukla/",
+  "Name": "Kushagra Shukla",
+  "Phone": "+91 8253031872",
+  "Post Graduation details": {
+    "CPI": "",
+    "College": "",
+    "Degree": "",
+    "Duration": ""
+  },
+  "Projects": [
+    "ALOGRITHMVISULAIZER |Next.js| Redux |Redux-Thunk| Express| Node.js\nEnhanced web application interface with interactive elements for sorting and pathfinding algorithms, resulting in a 30% improvement in application functionality and usability",
+  ],
+  "Skills": [
+    "• Intermediate : Go",
+    "SQL",
+  
+  ],
+  "Summary": [
+    "Kushagra Shukla is a skilled " , "Also, after having a relevant work experience, my future plan is to do an MBA 
+from a B-schools as well as to crack CFA level- I and II"
+  ]
+}
+
+
+Even do not write explenation like  '' Here is the JSON response' i only want json , make sure to get all projects in array of string `
+
+        function uploadFile() {
+            var formData = new FormData();
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            formData.append('file', file, file.name);
+
+            fetch('https://api.feedbacks.app/v1/test-extrector/upload-docx', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                // Display first API response
+                document.getElementById('firstApiResponse').innerHTML += "<pre>" + data.data + "</pre>";
+                document.getElementById('additionalInput').innerHTML += promptStr
+                firstApiResponseData.push(data.data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function sendData() {
+            let additionalData = document.getElementById('additionalInput').value;
+            let bodyData = firstApiResponseData.join("\n\n")  + additionalData;
+
+            fetch('https://api.feedbacks.app/v1/open-api/content', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: bodyData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display second API response
+                document.getElementById('secondApiResponse').innerHTML += "<pre>" + data.res + "</pre>";
+                document.getElementById('secondApiuse').innerHTML += "<pre>" + JSON.stringify(data.usage) + "</pre>";
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        function reloadPage() {
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
